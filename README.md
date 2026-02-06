@@ -63,23 +63,24 @@ Built with a modern, scalable tech stack using **FastAPI**, **React**, **MongoDB
 
 ticket-management-system/
 ├── backend/
-│ ├── app/
-│ │ ├── routes/
-│ │ ├── models/
-│ │ ├── services/
-│ │ ├── utils/
-│ │ └── main.py
-│ ├── Dockerfile
-│ └── requirements.txt
+│   ├── app/
+│   │   ├── routes/
+│   │   ├── models/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   └── main.py
+│   ├── Dockerfile
+│   └── requirements.txt
 │
 ├── frontend/
-│ ├── src/
-│ ├── public/
-│ ├── Dockerfile
-│ └── package.json
+│   ├── src/
+│   ├── public/
+│   ├── Dockerfile
+│   └── package.json
 │
 ├── docker-compose.yml
 └── README.md
+
 
 
 ---
