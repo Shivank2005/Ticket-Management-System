@@ -1,0 +1,383 @@
+/* frontend/src/index.css */
+
+:root {
+  --dark-bg: #1a202c;
+  --dark-bg-secondary: #2d3748;
+  --dark-border: #4a5568;
+  --text-primary: #edf2f7;
+  --text-secondary: #a0aec0;
+  --primary-blue: #4299e1;
+  --status-open: #f6e05e; /* yellow */
+  --status-progress: #63b3ed; /* blue */
+  --status-closed: #f56565; /* red */
+  --feedback-blue: #3182ce;
+  --bug-red: #c53030;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Button */
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-primary {
+  background-color: var(--primary-blue);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #2b6cb0;
+}
+.btn-secondary {
+  background-color: var(--dark-bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--dark-border);
+}
+.btn-secondary:hover {
+  background-color: var(--dark-border);
+}
+
+/* Table Card */
+.card {
+  background-color: var(--dark-bg-secondary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.filters {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Search and Select Inputs */
+input[type="search"], select {
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--dark-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+}
+input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Table */
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ticket-table th, .ticket-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--dark-border);
+}
+.ticket-table th {
+  color: var(--text-secondary);
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+.ticket-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Badges */
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+.badge-bug {
+  background-color: var(--bug-red);
+  color: white;
+}
+.badge-feedback {
+  background-color: var(--feedback-blue);
+  color: white;
+}
+.status-badge {
+  border: 1px solid;
+  color: black;
+}
+.status-open {
+  background-color: var(--status-open);
+  border-color: #d69e2e;
+}
+.status-in-progress {
+  background-color: var(--status-progress);
+  border-color: #4299e1;
+}
+
+/* Actions */
+.table-actions {
+  display: flex;
+  gap: 1rem;
+}
+.action-icon {
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+}
+.action-icon:hover {
+  color: var(--text-primary);
+}
+.action-icon-delete:hover {
+  color: #e53e3e;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: var(--dark-bg-secondary);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  position: relative;
+}
+.modal-close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-header h2 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--dark-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  box-sizing: border-box; /* Important */
+}
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.pagination {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.page-btn {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.page-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.search-input,
+.category-select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* frontend/src/index.css */
+
+/* ... (Your existing global styles go here above this block) ... */
+
+
+/* --- NEW STYLES FOR AUTH FORM --- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--dark-bg); /* Use your existing dark background variable */
+  padding: 2rem;
+  box-sizing: border-box; /* Include padding in element's total width/height */
+}
+
+.auth-card {
+  background-color: var(--dark-bg-secondary); /* Use your existing secondary dark background variable */
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  width: 100%;
+  max-width: 450px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-primary); /* Use your existing primary text color variable */
+}
+
+.auth-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.auth-toggle-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-toggle-buttons .btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+}
+
+.auth-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.auth-form .form-group label {
+  color: var(--text-secondary); /* Use your existing secondary text color variable */
+  display: block; /* Labels typically display as blocks for inputs below */
+  margin-bottom: 0.5rem;
+  font-weight: bold; /* Make labels bold like other forms */
+}
+
+
+.auth-form .form-group input {
+  background-color: var(--dark-bg);
+  border: 1px solid var(--dark-border); /* Use your existing border color variable */
+  color: var(--text-primary);
+  padding: 0.75rem;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box; /* Crucial for consistent padding within full width */
+}
+
+.auth-form .btn-submit {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+.auth-error {
+  color: #fc8181; /* A light red for errors, consistent with your alerts */
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.auth-form-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.auth-form-footer button {
+  background: none;
+  border: none;
+  color: var(--primary-blue); /* Use your existing primary blue color */
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0; /* Remove default button padding */
+}
+.auth-form-footer button:hover {
+  text-decoration: underline; /* Add underline on hover for toggle buttons */
+}
