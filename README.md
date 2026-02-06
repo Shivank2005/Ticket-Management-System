@@ -61,6 +61,9 @@ Built with a modern, scalable tech stack using **FastAPI**, **React**, **MongoDB
 
 ## Project Structure
 
+## 📂 Project Structure
+
+```text
 ticket-management-system/
 ├── backend/
 │   ├── app/
@@ -80,7 +83,6 @@ ticket-management-system/
 │
 ├── docker-compose.yml
 └── README.md
-
 
 
 ---
