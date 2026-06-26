@@ -5,9 +5,9 @@ echo ===========================================
 
 echo.
 echo [1/2] Starting Backend Services with Docker...
-cd "Ticket_support_Backend\Ticket_support_Backend\backend"
+cd backend
 docker-compose up -d
-cd ..\..\..
+cd ..
 
 echo.
 echo [2/2] Starting Frontend Server...
