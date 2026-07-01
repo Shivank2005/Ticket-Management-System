@@ -38,6 +38,7 @@ class ErrorBoundary extends React.Component {
 const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, currentUserRole, onCommentAdded }) => {
   const [commentText, setCommentText] = useState('');
   const [quillKey, setQuillKey] = useState(0);
+  const quillRef = React.useRef(null);
   const { toast } = useToast();
   const [isPrivate, setIsPrivate] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
@@ -164,6 +165,11 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
     } finally {
       setIsSubmitting(false);
       if (updatedTicket) {
+        // Force-clear ReactQuill via its internal API
+        if (quillRef.current) {
+          const editor = quillRef.current.getEditor ? quillRef.current.getEditor() : null;
+          if (editor) editor.setContents([]);
+        }
         setCommentText('');
         setQuillKey(prev => prev + 1);
         setSelectedFiles([]);
@@ -522,6 +528,7 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
                   
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <ReactQuill 
+                      ref={quillRef}
                       key={quillKey}
                       theme="snow"
                       value={commentText} 
