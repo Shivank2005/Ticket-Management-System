@@ -11,14 +11,16 @@ import asyncio
 
 
 def _send_email(to_email: str, subject: str, html_content: str, text_content: str):
-    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", 587))
     sender_email = os.getenv("EMAIL_SENDER")
-    sender_password = os.getenv("EMAIL_PASSWORD")
+    sender_password = os.getenv("EMAIL_PASSWORD", "").replace(" ", "")
 
-    if not all([smtp_server, smtp_port, sender_email, sender_password]):
-        print(" [CELERY WORKER] SMTP settings missing — email skipped.")
+    if not sender_email or not sender_password:
+        print(f" [EMAIL] SMTP settings missing — EMAIL_SENDER={sender_email}, PASSWORD={'set' if sender_password else 'MISSING'}")
         return False
+
+    print(f" [EMAIL] Attempting to send to {to_email} via {smtp_server}:{smtp_port} from {sender_email}")
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
@@ -28,14 +30,14 @@ def _send_email(to_email: str, subject: str, html_content: str, text_content: st
     message.attach(MIMEText(html_content, "html"))
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
             server.starttls()
             server.login(sender_email, sender_password)
             server.sendmail(sender_email, to_email, message.as_string())
-        print(f" [CELERY WORKER] Email sent to {to_email}")
+        print(f" [EMAIL] ✅ Successfully sent to {to_email}")
         return True
     except Exception as e:
-        print(f" [CELERY WORKER] Failed to send email to {to_email}: {e}")
+        print(f" [EMAIL] ❌ Failed to send to {to_email}: {type(e).__name__}: {e}")
         return False
 
 

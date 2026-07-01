@@ -117,6 +117,29 @@ async def invalidate_all_tickets_cache(redis_client_instance: Optional[redis.Red
         await redis_client_instance.flushdb()
 
 
+@router.get("/test-email")
+async def test_email():
+    """Temporary endpoint to test email sending on Render."""
+    from ..tasks import _send_email
+    sender = os.getenv("EMAIL_SENDER", "NOT SET")
+    password = os.getenv("EMAIL_PASSWORD", "NOT SET")
+    smtp = os.getenv("SMTP_SERVER", "smtp.gmail.com (default)")
+    
+    result = _send_email(
+        sender,
+        "NovaDesk Test Email",
+        "<h2>Email is working!</h2><p>Your NovaDesk email system is configured correctly.</p>",
+        "Email is working! Your NovaDesk email system is configured correctly."
+    )
+    return {
+        "email_sent": result,
+        "smtp_server": smtp,
+        "sender": sender,
+        "password_configured": password != "NOT SET" and len(password) > 0,
+    }
+
+
+
 async def invalidate_single_ticket_cache(ticket_id: str, redis_client_instance: Optional[redis.Redis]):
     if redis_client_instance:
         await redis_client_instance.delete(f"ticket:{ticket_id}")
