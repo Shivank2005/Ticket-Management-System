@@ -149,21 +149,25 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
 
     setIsSubmitting(true);
     setError('');
+    
+    let updatedTicket = null;
     try {
       const formData = new FormData();
       formData.append('text', commentText);
       formData.append('is_private', isPrivate);
       selectedFiles.forEach(f => formData.append('attachments', f));
       
-      const updatedTicket = await ticketService.addComment(ticket.id, formData);
-      setCommentText('');
-      setSelectedFiles([]);
-      setIsPrivate(false);
-      onCommentAdded(updatedTicket);
+      updatedTicket = await ticketService.addComment(ticket.id, formData);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to add comment');
     } finally {
       setIsSubmitting(false);
+      if (updatedTicket) {
+        setCommentText('');
+        setSelectedFiles([]);
+        setIsPrivate(false);
+        onCommentAdded(updatedTicket);
+      }
     }
   };
 
@@ -520,7 +524,7 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
                       value={commentText} 
                       onChange={handleTyping} 
                       placeholder="Type your message..." 
-                      readOnly={isSubmitting || isGeneratingAi}
+                      readOnly={isGeneratingAi}
                       className="message-input quill-message-input"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
