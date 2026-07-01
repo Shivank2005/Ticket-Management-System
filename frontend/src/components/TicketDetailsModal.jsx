@@ -37,6 +37,7 @@ class ErrorBoundary extends React.Component {
 
 const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, currentUserRole, onCommentAdded }) => {
   const [commentText, setCommentText] = useState('');
+  const [quillKey, setQuillKey] = useState(0);
   const { toast } = useToast();
   const [isPrivate, setIsPrivate] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
@@ -164,6 +165,7 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
       setIsSubmitting(false);
       if (updatedTicket) {
         setCommentText('');
+        setQuillKey(prev => prev + 1);
         setSelectedFiles([]);
         setIsPrivate(false);
         onCommentAdded(updatedTicket);
@@ -520,6 +522,7 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
                   
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <ReactQuill 
+                      key={quillKey}
                       theme="snow"
                       value={commentText} 
                       onChange={handleTyping} 
