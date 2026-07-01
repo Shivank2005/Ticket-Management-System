@@ -34,10 +34,10 @@ def _send_email(to_email: str, subject: str, html_content: str, text_content: st
             server.starttls()
             server.login(sender_email, sender_password)
             server.sendmail(sender_email, to_email, message.as_string())
-        print(f" [EMAIL] ✅ Successfully sent to {to_email}")
+        print(f" [EMAIL] Successfully sent to {to_email}")
         return True
     except Exception as e:
-        print(f" [EMAIL] ❌ Failed to send to {to_email}: {type(e).__name__}: {e}")
+        print(f" [EMAIL] Failed to send to {to_email}: {type(e).__name__}: {e}")
         return False
 
 
