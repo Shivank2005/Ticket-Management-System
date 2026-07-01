@@ -3,7 +3,7 @@ import authService from '../services/authService';
 import { useToast } from '../context/ToastContext';
 import { FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
 
-const ProfileSettings = ({ currentUsername }) => {
+const ProfileSettings = ({ currentUsername, onProfileUpdated }) => {
   const { toast } = useToast();
   
   const [email, setEmail] = useState('');
@@ -31,6 +31,7 @@ const ProfileSettings = ({ currentUsername }) => {
       setNewPassword('');
       setConfirmPassword('');
       setEmail('');
+      if (onProfileUpdated) onProfileUpdated();
     } catch (err) {
       toast.error(err.message || 'Failed to update profile');
     } finally {

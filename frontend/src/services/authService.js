@@ -137,11 +137,25 @@ const resetPassword = async (token, new_password) => {
   }
 };
 
+const getProfile = async () => {
+  try {
+    const token = getToken();
+    const response = await axios.get(AUTH_API_BASE_URL + 'users/me', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Get Profile Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.detail || 'Failed to fetch profile.');
+  }
+};
+
 export default {
   login,
   register,
   registerStaff,
   updateProfile,
+  getProfile,
   logout,
   isAuthenticated,
   getToken,

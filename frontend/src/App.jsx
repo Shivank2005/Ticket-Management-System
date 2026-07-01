@@ -62,6 +62,16 @@ function App() {
   const [loggedInUsername, setLoggedInUsername] = useState(localStorage.getItem('username') || '');
   const [userRole, setUserRole] = useState(authService.getRole());
   const [resetToken, setResetToken] = useState(null);
+  const [userEmail, setUserEmail] = useState('');
+
+  const fetchUserProfile = async () => {
+    try {
+      const profile = await authService.getProfile();
+      setUserEmail(profile.email || '');
+    } catch (e) {
+      console.error('Failed to fetch profile:', e);
+    }
+  };
 
   const isStaff = userRole === 'admin' || userRole === 'agent';
 
@@ -266,12 +276,14 @@ function App() {
     setUserRole(role);
     setActiveTab(role === 'agent' ? 'Agent Queue' : 'Dashboard');
     fetchTickets();
-  }, [fetchTickets]);
+    setTimeout(() => fetchUserProfile(), 100);
+  }, [fetchTickets, fetchUserProfile]);
 
   const handleLogout = useCallback(() => {
     authService.logout();
     setIsLoggedIn(false);
     setLoggedInUsername('');
+    setUserEmail('');
     setUserRole('user');
     setTickets([]);
     setSidebarOpen(false);
@@ -280,6 +292,7 @@ function App() {
   const navigate = (tab) => {
     setActiveTab(tab);
     setSidebarOpen(false);
+    if (tab === 'Settings') fetchUserProfile();
   };
 
   const navItems = useMemo(() => {
@@ -661,7 +674,7 @@ function App() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-pure)' }}>{loggedInUsername}</h3>
                   <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    Email: <span style={{ color: 'var(--text-primary)' }}>{loggedInUsername}@ticketmanagement.com</span>
+                    Email: <span style={{ color: 'var(--text-primary)' }}>{userEmail || 'Loading...'}</span>
                   </p>
                   <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     Role: <span style={{ color: 'var(--accent-light)', fontWeight: 600, textTransform: 'capitalize' }}>{userRole}</span>
@@ -670,7 +683,7 @@ function App() {
                 </div>
               </div>
               
-              <ProfileSettings currentUsername={loggedInUsername} />
+              <ProfileSettings currentUsername={loggedInUsername} onProfileUpdated={fetchUserProfile} />
             </div>
 
             {/* Appearance & Layout Card */}
