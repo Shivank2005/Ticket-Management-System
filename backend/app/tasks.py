@@ -20,9 +20,9 @@ def _send_email(to_email: str, subject: str, html_content: str, text_content: st
         print(" [CELERY WORKER] SMTP settings missing — email skipped.")
         return False
 
-    dummy_patterns = ['@test.com', '@example.com', 'hacker@', 'test@', 'dummy@', 'admin@']
+    dummy_patterns = ['@test.com', '@example.com']
     if any(pattern in to_email.lower() for pattern in dummy_patterns):
-        print(f" [CELERY WORKER] Skipped sending email to dummy address {to_email}")
+        print(f" [EMAIL] Skipped sending email to dummy address {to_email}")
         return True
 
     message = MIMEMultipart("alternative")

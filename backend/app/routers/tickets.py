@@ -20,7 +20,10 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+import threading
+
 def _dispatch_email(task_name: str, *args, **kwargs):
+    """Send email directly in a background thread (no Celery needed)."""
     try:
         from ..tasks import send_ticket_creation_email, send_ticket_update_email
         tasks = {
@@ -29,9 +32,11 @@ def _dispatch_email(task_name: str, *args, **kwargs):
         }
         task = tasks.get(task_name)
         if task:
-            task.delay(*args, **kwargs)
+            # Call the underlying function directly in a background thread
+            thread = threading.Thread(target=task, args=args, kwargs=kwargs, daemon=True)
+            thread.start()
     except Exception as e:
-        print(f"Could not dispatch Celery task '{task_name}': {e}")
+        print(f"Could not dispatch email task '{task_name}': {e}")
 
 
 async def invalidate_all_tickets_cache(redis_client_instance: Optional[redis.Redis]):
