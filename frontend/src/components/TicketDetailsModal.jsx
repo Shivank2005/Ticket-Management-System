@@ -149,33 +149,40 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
     const cleanText = commentText.replace(/<[^>]*>?/gm, '').trim();
     if (!cleanText && selectedFiles.length === 0) return;
 
+    // Save current text in case we need to restore on error
+    const savedText = commentText;
+    const savedFiles = [...selectedFiles];
+    const savedPrivate = isPrivate;
+
+    // Clear the editor INSTANTLY for snappy UX
+    if (quillRef.current) {
+      const editor = quillRef.current.getEditor ? quillRef.current.getEditor() : null;
+      if (editor) editor.setContents([]);
+    }
+    setCommentText('');
+    setQuillKey(prev => prev + 1);
+    setSelectedFiles([]);
+    setIsPrivate(false);
+
     setIsSubmitting(true);
     setError('');
     
-    let updatedTicket = null;
     try {
       const formData = new FormData();
-      formData.append('text', commentText);
-      formData.append('is_private', isPrivate);
-      selectedFiles.forEach(f => formData.append('attachments', f));
+      formData.append('text', savedText);
+      formData.append('is_private', savedPrivate);
+      savedFiles.forEach(f => formData.append('attachments', f));
       
-      updatedTicket = await ticketService.addComment(ticket.id, formData);
+      const updatedTicket = await ticketService.addComment(ticket.id, formData);
+      onCommentAdded(updatedTicket);
     } catch (err) {
+      // Restore the text so the user doesn't lose their message
+      setCommentText(savedText);
+      setSelectedFiles(savedFiles);
+      setIsPrivate(savedPrivate);
       setError(err.response?.data?.detail || 'Failed to add comment');
     } finally {
       setIsSubmitting(false);
-      if (updatedTicket) {
-        // Force-clear ReactQuill via its internal API
-        if (quillRef.current) {
-          const editor = quillRef.current.getEditor ? quillRef.current.getEditor() : null;
-          if (editor) editor.setContents([]);
-        }
-        setCommentText('');
-        setQuillKey(prev => prev + 1);
-        setSelectedFiles([]);
-        setIsPrivate(false);
-        onCommentAdded(updatedTicket);
-      }
     }
   };
 
