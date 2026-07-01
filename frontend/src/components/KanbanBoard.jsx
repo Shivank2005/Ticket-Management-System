@@ -8,7 +8,7 @@ const KanbanBoard = ({ tickets, onEdit, onDelete, onView }) => {
   const columns = ['Open', 'In Progress', 'Closed'];
 
   const handleDragStart = (e, ticketId) => {
-    e.dataTransfer.setData('ticketId', ticketId);
+    e.dataTransfer.setData('text/plain', ticketId);
   };
 
   const handleDragOver = (e) => {
@@ -21,8 +21,9 @@ const KanbanBoard = ({ tickets, onEdit, onDelete, onView }) => {
   };
 
   const handleDrop = async (e, newStatus) => {
+    e.preventDefault();
     e.currentTarget.classList.remove('kanban-column-dragover');
-    const ticketId = e.dataTransfer.getData('ticketId');
+    const ticketId = e.dataTransfer.getData('text/plain');
     if (!ticketId) return;
 
     const ticket = tickets.find((t) => t.id === ticketId);
