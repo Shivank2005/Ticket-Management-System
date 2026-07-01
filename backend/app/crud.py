@@ -56,7 +56,8 @@ async def retrieve_tickets(
         query["$or"] = [
             {"project_id": {"$in": allowed_projects}},
             {"project_id": {"$exists": False}},
-            {"project_id": None}
+            {"project_id": None},
+            {"project_id": ""}
         ]
 
     if extra_conditions:
