@@ -35,7 +35,7 @@ class ActivityLogSchema(BaseModel):
 
 
 class CommentSchema(BaseModel):
-    text: str = Field(..., min_length=1, max_length=1000, description="The comment text")
+    text: str = Field(..., min_length=1, max_length=10000, description="The comment text")
     author_username: str = Field(..., description="The username of the comment author")
     author_role: str = Field(..., description="The role of the comment author")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="Timestamp of the comment")
@@ -44,8 +44,8 @@ class CommentSchema(BaseModel):
 
 
 class TicketSchema(BaseModel):
-    title: str = Field(..., min_length=3, max_length=50, description="The title of the ticket")
-    description: str = Field(..., min_length=3, max_length=500, description="The detailed description of the issue or feedback")
+    title: str = Field(..., min_length=3, max_length=100, description="The title of the ticket")
+    description: str = Field(..., min_length=3, max_length=5000, description="The detailed description of the issue or feedback")
     category: str = Field(..., description="The category of the ticket, e.g., 'Bug', 'Feedback'")
     status: str = Field(default="Open", description="The current status of the ticket")
     priority: str = Field(default="Medium", description="Priority level: Low, Medium, High, Critical")
