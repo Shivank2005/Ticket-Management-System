@@ -522,6 +522,14 @@ const TicketDetailsModal = ({ isOpen, onRequestClose, ticket, currentUsername, c
                       placeholder="Type your message..." 
                       readOnly={isSubmitting || isGeneratingAi}
                       className="message-input quill-message-input"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          if (!isSubmitting && !isGeneratingAi && (commentText.replace(/<[^>]*>?/gm, '').trim() || selectedFiles.length > 0)) {
+                            handleAddComment(e);
+                          }
+                        }
+                      }}
                     />
                   </div>
                   
