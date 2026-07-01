@@ -1,105 +1,173 @@
-// frontend/src/components/TicketTable.jsx
-
-import React, { useState } from 'react';
-import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaEye, FaEdit, FaTrash, FaImage, FaUser, FaEllipsisV, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { format } from 'date-fns';
-import ticketService from '../services/ticketService.js';
+import ticketService, { getPriorityClass } from '../services/ticketService.js';
+import EmptyState from './EmptyState';
+import SlaTimer from './SlaTimer';
 
-const TicketTable = ({ tickets, onEdit, onDelete, onView }) => {
+const TicketTable = ({ tickets, onEdit, onDelete, onView, userRole, showAssignee = false, emptyVariant = 'default' }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const ticketsPerPage = 8;
+  const [activeMenuId, setActiveMenuId] = useState(null);
+  const ticketsPerPage = 6;
+
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setActiveMenuId(null);
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
 
   const totalPages = Math.ceil(tickets.length / ticketsPerPage);
   const indexOfLastTicket = currentPage * ticketsPerPage;
   const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
   const currentTickets = tickets.slice(indexOfFirstTicket, indexOfLastTicket);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
   const getStatusClass = (status) => {
-    switch (status.toLowerCase()) {
-      case 'open':
-        return 'status-open';
-      case 'in progress':
-        return 'status-in-progress';
-      case 'closed':
-        return 'status-closed';
-      default:
-        return '';
+    switch (status?.toLowerCase()) {
+      case 'open': return 'status-open';
+      case 'in progress': return 'status-in-progress';
+      case 'closed': return 'status-closed';
+      default: return '';
     }
   };
 
   const getCategoryClass = (category) => {
-    return category.toLowerCase() === 'bug' ? 'badge-bug' : 'badge-feedback';
+    const lower = (category || '').toLowerCase();
+    if (lower.includes('bug')) return 'badge-bug';
+    if (lower.includes('feature')) return 'badge-feature';
+    return 'badge-feedback';
   };
+
+  if (tickets.length === 0) {
+    return <EmptyState variant={emptyVariant} />;
+  }
 
   return (
     <>
-      <table className="ticket-table">
-        <thead>
-          <tr>
-            <th>Ticket ID</th>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentTickets.map((ticket) => (
-            <tr key={ticket.id}>
-              <td>{ticket.id}</td>
-              <td>
+      <div className={`ticket-list ${showAssignee ? 'ticket-list-wide' : ''}`}>
+        {currentTickets.map((ticket) => (
+          <div className="ticket-item" key={ticket.id} onClick={() => onView(ticket)}>
+            <div className="t-info">
+              <div className="t-title">
                 {ticket.title}
-                {ticket.image_url && (
-                  <div style={{ marginTop: '5px' }}>
-                    <a
-                      href={`${ticketService.BASE_URL}${ticket.image_url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: 'var(--primary-blue)', textDecoration: 'none', fontSize: '0.9em' }}
-                    >
-                      View Image
-                    </a>
-                  </div>
+                {ticket.attachments && ticket.attachments.length > 0 && (
+                  <span style={{ marginLeft: '8px', color: 'var(--text-tertiary)' }} title="Attachments">
+                    <FaImage size={14} />
+                  </span>
                 )}
-              </td>
-              <td>
-                <span className={`badge ${getCategoryClass(ticket.category)}`}>
-                  {ticket.category}
-                </span>
-              </td>
-              <td>
-                <span className={`badge status-badge ${getStatusClass(ticket.status)}`}>
-                  {ticket.status}
-                </span>
-              </td>
-              <td>{format(new Date(ticket.created), 'MMM dd, yyyy, p')}</td>
-              <td className="table-actions">
-                <FaEye className="action-icon" onClick={() => onView(ticket)} />
-                <FaEdit className="action-icon" onClick={() => onEdit(ticket)} />
-                <FaTrash className="action-icon action-icon-delete" onClick={() => onDelete(ticket.id)} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+              <div className="t-id">ID: {ticket.id.slice(-8)}</div>
+            </div>
 
-      {/* Pagination Controls */}
-      <div className="pagination">
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index}
-            className={`page-btn ${currentPage === index + 1 ? 'active' : ''}`}
-            onClick={() => handlePageChange(index + 1)}
-          >
-            {index + 1}
-          </button>
+            <div>
+              <span className={`badge ${getCategoryClass(ticket.category)}`}>{ticket.category}</span>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+              <span className={`badge priority-badge ${getPriorityClass(ticket.priority)}`}>
+                {ticket.priority || 'Medium'}
+              </span>
+              <SlaTimer deadline={ticket.sla_deadline} isBreached={ticket.is_sla_breached} status={ticket.status} created={ticket.created} />
+            </div>
+
+            <div>
+              <span className={`badge ${getStatusClass(ticket.status)}`}>{ticket.status}</span>
+              {ticket.csat_rating && (
+                <span style={{ marginLeft: '8px', color: '#eab308', fontSize: '0.9rem' }} title={`CSAT: ${ticket.csat_rating}/5 - ${ticket.csat_feedback || 'No feedback'}`}>
+                  {'★'.repeat(ticket.csat_rating)}{'☆'.repeat(5 - ticket.csat_rating)}
+                </span>
+              )}
+            </div>
+
+            {showAssignee && (
+              <div className="t-assignee">
+                {ticket.assigned_to ? (
+                  <><FaUser size={11} /> {ticket.assigned_to}</>
+                ) : (
+                  <span className="unassigned-label">Unassigned</span>
+                )}
+              </div>
+            )}
+
+            <div className="t-date">{format(new Date(ticket.created), 'MMM dd, yyyy')}</div>
+
+            <div className="t-actions" style={{ position: 'relative' }}>
+              <button 
+                className="btn-icon" 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setActiveMenuId(activeMenuId === ticket.id ? null : ticket.id); 
+                }} 
+                title="Options"
+              >
+                <FaEllipsisV size={14} />
+              </button>
+              
+              {activeMenuId === ticket.id && (
+                <div className="dropdown-menu">
+                  <button 
+                    className="dropdown-item" 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      onEdit(ticket); 
+                      setActiveMenuId(null); 
+                    }}
+                  >
+                    <FaEdit style={{ marginRight: '8px' }} /> Edit
+                  </button>
+                  {userRole === 'admin' && (
+                    <button 
+                      className="dropdown-item delete" 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        onDelete(ticket.id); 
+                        setActiveMenuId(null); 
+                      }}
+                    >
+                      <FaTrash style={{ marginRight: '8px' }} /> Delete
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="pagination" style={{ alignItems: 'center', gap: '1rem' }}>
+          <button
+            className="page-btn"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            style={{ 
+              opacity: currentPage === 1 ? 0.3 : 1, 
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <FaChevronLeft />
+          </button>
+          
+          <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+            Page <span style={{ color: 'var(--accent-blue)' }}>{currentPage}</span> of {totalPages}
+          </span>
+          
+          <button
+            className="page-btn"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            style={{ 
+              opacity: currentPage === totalPages ? 0.3 : 1, 
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <FaChevronRight />
+          </button>
+        </div>
+      )}
     </>
   );
 };

@@ -21,8 +21,9 @@ services:
       
       SMTP_SERVER: "smtp.gmail.com"
       SMTP_PORT: 587
-      EMAIL_SENDER: "parasshresth82@gmail.com"
-      EMAIL_PASSWORD: "ildp dtcr dsdh cyvu"
+      EMAIL_SENDER: "shivanksharma821@gmail.com"
+      EMAIL_PASSWORD: "${EMAIL_PASSWORD}"
+      GROQ_API_KEY: "${GROQ_API_KEY}"
     networks:
       - backend_network
 
@@ -56,8 +57,24 @@ services:
       
       SMTP_SERVER: "smtp.gmail.com"
       SMTP_PORT: 587
-      EMAIL_SENDER: "parasshresth82@gmail.com"
-      EMAIL_PASSWORD: "ildp dtcr dsdh cyvu"
+      EMAIL_SENDER: "shivanksharma821@gmail.com"
+      EMAIL_PASSWORD: "${EMAIL_PASSWORD}"
+      GROQ_API_KEY: "${GROQ_API_KEY}"
+    networks:
+      - backend_network
+  
+  celery-beat:
+    build: . 
+    container_name: support_ticket_celery_beat
+    command: celery -A app.celery_app beat --loglevel=info
+    depends_on:
+      - rabbitmq 
+      - mongodb  
+      - redis    
+    environment:
+      MONGO_DETAILS: mongodb://host.docker.internal:27017/  
+      REDIS_URL: redis://redis:6379/0         
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/%2F 
     networks:
       - backend_network
   

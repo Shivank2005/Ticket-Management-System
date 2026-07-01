@@ -16,3 +16,16 @@ celery_app.conf.update(
     task_track_started=True,
     broker_connection_retry_on_startup=True,
 )
+
+from celery.schedules import crontab
+
+celery_app.conf.beat_schedule = {
+    "check_sla_breaches_every_minute": {
+        "task": "check_sla_breaches",
+        "schedule": crontab(minute="*"),
+    },
+    "check_sla_warnings_every_minute": {
+        "task": "check_sla_warnings",
+        "schedule": crontab(minute="*"),
+    },
+}

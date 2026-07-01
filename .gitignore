@@ -5,3 +5,5 @@ __pycache__/
 .env
 uploads/
 .DS_Store
+frontend/dist/
+backend/venv/

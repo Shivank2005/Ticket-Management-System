@@ -1,9 +1,11 @@
 // frontend/src/components/ResetPasswordForm.jsx
 
-import React, { useState,} from 'react';
+import React, { useState } from 'react';
 import authService from '../services/authService';
+import { useToast } from '../context/ToastContext';
 
 const ResetPasswordForm = ({ token }) => {
+  const { toast } = useToast();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,6 +30,7 @@ const ResetPasswordForm = ({ token }) => {
     try {
       const response = await authService.resetPassword(token, newPassword);
       setSuccess(response.message || "Password has been reset successfully! You can now log in.");
+      toast.success('Password reset successfully!');
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
     } finally {

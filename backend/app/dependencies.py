@@ -22,12 +22,23 @@ database = client.tickets
 
 ticket_collection = database.get_collection("tickets_collection")
 user_collection = database.get_collection("users_collection") 
+notification_collection = database.get_collection("notifications_collection")
+project_collection = database.get_collection("projects_collection")
 
 
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379") 
 global_redis_client_instance = None # Will hold the connected Redis client
 
+
+def project_helper(project) -> dict:
+    return {
+        "id": str(project["_id"]),
+        "project_id": project["project_id"],
+        "name": project["name"],
+        "members": project.get("members", []),
+        "description": project.get("description", "")
+    }
 
 #Transforms a MongoDB document into a dict
 def ticket_helper(ticket) -> dict:
@@ -37,8 +48,19 @@ def ticket_helper(ticket) -> dict:
         "description": ticket["description"],
         "category": ticket["category"],
         "status": ticket["status"],
+        "priority": ticket.get("priority", "Medium"),
         "created": ticket["created"],
-        "image_url": ticket.get("image_url")
+        "attachments": ticket.get("attachments", []),
+        "project_id": ticket.get("project_id"),
+        "sla_deadline": ticket.get("sla_deadline"),
+        "is_sla_breached": ticket.get("is_sla_breached", False),
+        "owner_username": ticket.get("owner_username"),
+        "assigned_to": ticket.get("assigned_to"),
+        "comments": ticket.get("comments", []),
+        "activity_log": ticket.get("activity_log", []),
+        "custom_fields_data": ticket.get("custom_fields_data", {}),
+        "csat_rating": ticket.get("csat_rating"),
+        "csat_feedback": ticket.get("csat_feedback"),
     }
 
 
