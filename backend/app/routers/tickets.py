@@ -21,22 +21,95 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 import threading
+from ..dependencies import user_collection
 
-def _dispatch_email(task_name: str, *args, **kwargs):
-    """Send email directly in a background thread (no Celery needed)."""
+def _send_email_in_thread(to_email: str, subject: str, html: str, text: str):
+    """Send a single email in a background thread (no async, no DB)."""
+    from ..tasks import _send_email
+    thread = threading.Thread(
+        target=_send_email,
+        args=(to_email, subject, html, text),
+        daemon=True
+    )
+    thread.start()
+
+async def _dispatch_creation_email(ticket_data: dict, owner_username: str):
+    """Gather data from DB in async context, then send email in background thread."""
     try:
-        from ..tasks import send_ticket_creation_email, send_ticket_update_email
-        tasks = {
-            "create": send_ticket_creation_email,
-            "update": send_ticket_update_email,
-        }
-        task = tasks.get(task_name)
-        if task:
-            # Call the underlying function directly in a background thread
-            thread = threading.Thread(target=task, args=args, kwargs=kwargs, daemon=True)
-            thread.start()
+        owner = await user_collection.find_one({"username": owner_username})
+        if not owner or not owner.get("email"):
+            print(f" [EMAIL] No email found for owner '{owner_username}' — skipped.")
+            return
+        owner_email = owner["email"]
+        title = ticket_data.get("title", "Untitled")
+        priority = ticket_data.get("priority", "Medium")
+        ticket_status = ticket_data.get("status", "Open")
+        ticket_id = ticket_data.get("id", "N/A")
+
+        subject = f"Ticket Created: #{ticket_id[:8]} — {title}"
+        text = (
+            f"Your ticket '{title}' has been created.\n"
+            f"Priority: {priority}\n"
+            f"Status: {ticket_status}\n"
+            f"Ticket ID: {ticket_id}"
+        )
+        html = f"""
+        <h2>Ticket Created</h2>
+        <p>Your support ticket has been submitted successfully.</p>
+        <ul>
+          <li><strong>Title:</strong> {title}</li>
+          <li><strong>Priority:</strong> {priority}</li>
+          <li><strong>Status:</strong> {ticket_status}</li>
+          <li><strong>ID:</strong> {ticket_id}</li>
+        </ul>
+        """
+        _send_email_in_thread(owner_email, subject, html, text)
     except Exception as e:
-        print(f"Could not dispatch email task '{task_name}': {e}")
+        print(f" [EMAIL] Failed to dispatch creation email: {e}")
+
+async def _dispatch_update_email(ticket_data: dict, change_summary: str, acting_username: str = None):
+    """Gather recipients from DB in async context, then send email in background thread."""
+    try:
+        recipients = set()
+        owner_username = ticket_data.get("owner_username")
+        if owner_username:
+            owner = await user_collection.find_one({"username": owner_username})
+            if owner and owner.get("email"):
+                recipients.add(owner["email"])
+
+        assigned_to = ticket_data.get("assigned_to")
+        if assigned_to:
+            agent = await user_collection.find_one({"username": assigned_to})
+            if agent and agent.get("email"):
+                recipients.add(agent["email"])
+
+        if acting_username and acting_username != owner_username and acting_username != assigned_to:
+            actor = await user_collection.find_one({"username": acting_username})
+            if actor and actor.get("email"):
+                recipients.add(actor["email"])
+
+        if not recipients:
+            print(f" [EMAIL] No recipients for update email — skipped.")
+            return
+
+        title = ticket_data.get("title", "Untitled")
+        ticket_status = ticket_data.get("status", "Open")
+        priority = ticket_data.get("priority", "Medium")
+        ticket_id = ticket_data.get("id", "N/A")
+
+        subject = f"Ticket Updated: #{ticket_id[:8]} — {title}"
+        text = f"Ticket '{title}' was updated.\n\nChanges:\n{change_summary}\n\nCurrent status: {ticket_status}"
+        html = f"""
+        <h2>Ticket Updated</h2>
+        <p><strong>{title}</strong></p>
+        <p>{change_summary}</p>
+        <p>Current status: <strong>{ticket_status}</strong></p>
+        <p>Priority: <strong>{priority}</strong></p>
+        """
+        for email in recipients:
+            _send_email_in_thread(email, subject, html, text)
+    except Exception as e:
+        print(f" [EMAIL] Failed to dispatch update email: {e}")
 
 
 async def invalidate_all_tickets_cache(redis_client_instance: Optional[redis.Redis]):
@@ -201,7 +274,7 @@ async def create_ticket(
         notif_out = NotificationInDB.model_validate(notif_db)
         await manager.broadcast({"event": "new_notification", "notification": notif_out.model_dump(mode="json")})
 
-    _dispatch_email("create", new_ticket_db_dict["id"], current_user.username)
+    await _dispatch_creation_email(new_ticket_db_dict, current_user.username)
 
     return new_ticket_response
 
@@ -388,7 +461,7 @@ async def update_ticket_data(
 
         if changes:
             summary = "; ".join(changes)
-            _dispatch_email("update", id, summary, current_user.username)
+            await _dispatch_update_email(updated_ticket_dict, summary, current_user.username)
 
         return updated_ticket_dict
 
@@ -485,7 +558,7 @@ async def add_comment(
                 "ticket": validated.model_dump(mode="json"),
             })
 
-            _dispatch_email("update", id, f"New comment by {current_user.username}", current_user.username)
+            await _dispatch_update_email(updated_ticket_dict, f"New comment by {current_user.username}", current_user.username)
             return updated_ticket_dict
 
     raise HTTPException(status_code=500, detail="Failed to add comment")
