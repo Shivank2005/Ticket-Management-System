@@ -649,7 +649,7 @@ function App() {
         )}
 
         {activeTab === 'Settings' && (
-          <div className="content-area settings-panel" style={{ maxWidth: '900px', margin: '0 auto', gap: '2.5rem' }}>
+          <div className="content-area settings-panel" style={{ maxWidth: '1200px', margin: '0 auto', gap: '2.5rem' }}>
             
             {/* Account Profile Card */}
             <div className="settings-section">
