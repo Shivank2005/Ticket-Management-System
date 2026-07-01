@@ -2,9 +2,9 @@
 import axios from 'axios';
 import authService from './authService';
 
-const API_URL = "http://localhost:8090/api/tickets/";
-const PROJECTS_URL = "http://localhost:8090/api/projects/";
-const BASE_URL = "http://localhost:8090";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8090";
+const API_URL = `${BASE_URL}/api/tickets/`;
+const PROJECTS_URL = `${BASE_URL}/api/projects/`;
 
 const api = axios.create();
 

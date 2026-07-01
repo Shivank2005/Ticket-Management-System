@@ -1,5 +1,6 @@
 import axios from 'axios';
-const AUTH_API_BASE_URL = "http://localhost:8090/api/"; 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8090";
+const AUTH_API_BASE_URL = `${BASE_URL}/api/`; 
 
 const setAuthData = (token, username, role) => {
   localStorage.setItem('userToken', token);
