@@ -73,12 +73,12 @@ Want to explore the application without signing up? Use the following dummy cred
 
 ### 👑 Administrator Account
 - **Portal:** `/staff`
-- **Username:** `admin_demo`
+- **Username:** `admin`
 - **Password:** `AdminSecure123!`
 
 ### 🎧 Support Agent Account
 - **Portal:** `/staff`
-- **Username:** `agent_demo`
+- **Username:** `agent`
 - **Password:** `AgentSecure123!`
 
 ### 👤 End-User Account
